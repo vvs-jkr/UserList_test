@@ -1,23 +1,24 @@
 export interface User {
-	id: number
-	name: string
-	username: string
-	email: string
-	address: {
-	//   street: string
-	//   suite: string
-	  city: string
-	//   zipcode: string
-	//   geo: {
-	// 	 lat: string
-	// 	 lng: string
-	//   }
-	}
-	phone: string
-	website: string
-	company: {
-	//   name: string
-	//   catchPhrase: string
-	//   bs: string
-	}
- }
+  id: number
+  name: string
+  username: string
+  email: string
+  address: {
+    city: string
+  }
+}
+
+export interface UserFormValues {
+  name: string
+  email: string
+  address: {
+    city: string
+  }
+}
+
+export interface UserModalProps {
+  visible: boolean
+  onCancel: () => void
+  onSubmit: (data: User) => void
+  currentUser?: User | null
+}

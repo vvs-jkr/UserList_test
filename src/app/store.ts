@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { userApi } from '../entities/user/model/userApi'
+import { userApi } from '../entities/user/api/userApi'
 import userReducer from '../entities/user/model/userSlice'
 
 export const store = configureStore({

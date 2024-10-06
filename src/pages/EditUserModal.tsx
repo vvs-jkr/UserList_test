@@ -1,6 +1,6 @@
 import React from 'react'
 import { Modal, Form, Input } from 'antd'
-import { User } from '../../entities/user/model/types'
+import { User } from '../entities/user/model/types'
 
 interface EditUserModalProps {
   visible: boolean
@@ -42,7 +42,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
           ...user.address,
           city: values.address.city,
         },
-      }) // Отправка обновленного пользователя
+      })
     }
   }
 

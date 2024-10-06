@@ -1,7 +1,7 @@
 import { Input } from 'antd'
 import React from 'react'
 import { User } from '../../../entities/user/model/types'
-import { debounce } from '../../../shared/lib/utils/debounce'
+import useDebounce from '../../../shared/lib/utils/useDebounce'
 
 interface UserSearchProps {
   users: User[]
@@ -11,20 +11,22 @@ interface UserSearchProps {
 const UserSearch: React.FC<UserSearchProps> = ({ users, onFilteredUsers }) => {
   const [searchTerm, setSearchTerm] = React.useState<string>('')
 
-  const debouncedSearch = React.useCallback(
-    debounce((value: string) => {
+  const debouncedSearchTerm = useDebounce(searchTerm, 1000)
+
+  React.useEffect(() => {
+    if (debouncedSearchTerm) {
       const filteredUsers = users.filter((user) =>
-        user.name.toLowerCase().includes(value.toLowerCase())
+        user.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       )
       onFilteredUsers(filteredUsers)
-    }, 1000),
-    [users]
-  )
+    } else {
+      onFilteredUsers(users) // Если строка поиска пустая, возвращаем всех пользователей
+    }
+  }, [debouncedSearchTerm, users, onFilteredUsers])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setSearchTerm(value)
-    debouncedSearch(value)
   }
 
   return (

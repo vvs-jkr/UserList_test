@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { User } from './types'
+import { User } from '../model/types'
 
 export const userApi = createApi({
   reducerPath: 'userApi',
@@ -13,5 +13,4 @@ export const userApi = createApi({
   }),
 })
 
-// Экспортируем хуки для использования в компонентах
 export const { useGetUsersQuery } = userApi
