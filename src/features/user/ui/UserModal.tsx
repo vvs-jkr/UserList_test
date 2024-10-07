@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button, Input, Modal, Form as AntForm } from 'antd'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import {
   User,
   UserFormValues,
@@ -16,40 +16,27 @@ const UserModal: React.FC<UserModalProps> = ({
   currentUser,
 }) => {
   const {
-    register,
     handleSubmit,
-    setValue,
-    reset,
+    control,
     formState: { errors },
+    reset,
   } = useForm<UserFormValues>({
     resolver: yupResolver(schema),
+    defaultValues: currentUser || {
+      name: '',
+      email: '',
+      username: '',
+      address: { city: '' },
+    },
   })
 
-  React.useEffect(() => {
-    if (currentUser) {
-      setValue('name', currentUser.name)
-      setValue('email', currentUser.email)
-      setValue('address.city', currentUser.address.city)
-    } else {
-      reset({
-        name: '',
-        email: '',
-        address: { city: '' },
-      })
-    }
-  }, [currentUser, setValue, reset])
-
   const handleFormSubmit = (newUserData: UserFormValues) => {
-    console.log('Form values before submission:', newUserData)
-
     const newUser: User = {
       id: currentUser?.id || Date.now(),
-      username: currentUser?.username || 'default_username',
       ...newUserData,
     }
-
-    console.log('Submitted user:', newUser)
     onSubmit(newUser)
+    onCancel()
   }
 
   return (
@@ -61,11 +48,27 @@ const UserModal: React.FC<UserModalProps> = ({
     >
       <AntForm layout="vertical" onFinish={handleSubmit(handleFormSubmit)}>
         <AntForm.Item
+          label="Username"
+          validateStatus={errors.username ? 'error' : ''}
+          help={errors.username?.message}
+        >
+          <Controller
+            name="username"
+            control={control}
+            render={({ field }) => <Input {...field} />}
+          />
+        </AntForm.Item>
+
+        <AntForm.Item
           label="Name"
           validateStatus={errors.name ? 'error' : ''}
           help={errors.name?.message}
         >
-          <Input {...register('name')} />
+          <Controller
+            name="name"
+            control={control}
+            render={({ field }) => <Input {...field} />}
+          />
         </AntForm.Item>
 
         <AntForm.Item
@@ -73,7 +76,11 @@ const UserModal: React.FC<UserModalProps> = ({
           validateStatus={errors.email ? 'error' : ''}
           help={errors.email?.message}
         >
-          <Input {...register('email')} />
+          <Controller
+            name="email"
+            control={control}
+            render={({ field }) => <Input {...field} />}
+          />
         </AntForm.Item>
 
         <AntForm.Item
@@ -81,7 +88,11 @@ const UserModal: React.FC<UserModalProps> = ({
           validateStatus={errors.address?.city ? 'error' : ''}
           help={errors.address?.city?.message}
         >
-          <Input {...register('address.city')} />
+          <Controller
+            name="address.city"
+            control={control}
+            render={({ field }) => <Input {...field} />}
+          />
         </AntForm.Item>
 
         <AntForm.Item>

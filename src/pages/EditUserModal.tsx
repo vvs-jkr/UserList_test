@@ -43,6 +43,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
           city: values.address.city,
         },
       })
+      onCancel()
     }
   }
 
