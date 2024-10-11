@@ -2,10 +2,8 @@ import React from 'react'
 import { Button, Input, Layout, Tooltip } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { HeaderProps } from './appHeader.model'
-import { useNavigate } from 'react-router-dom'
-import { User } from '../../../../entities/user/model/types'
-import useDebounce from '../../../../shared/lib/utils/useDebounce'
 import UserModal from '../../../../features/user/ui/UserModal'
+import { useNavigate } from 'react-router-dom'
 
 const headerStyle: React.CSSProperties = {
   textAlign: 'center',
@@ -20,33 +18,20 @@ const headerStyle: React.CSSProperties = {
 const AppHeader: React.FC<HeaderProps> = ({
   onSearch,
   hideCreateUserButton,
-  setFilteredUsers,
+  onCreateUser,
+  searchTerm,
 }) => {
-  const navigate = useNavigate()
   const [isAddModalVisible, setIsAddModalVisible] = React.useState(false)
-  const [searchTerm, setSearchTerm] = React.useState('')
-
-  const debouncedSearchTerm = useDebounce(searchTerm, 300)
-  const previousTerm = React.useRef(debouncedSearchTerm)
-
-  const handleNavigateToFavorites = () => {
-    navigate('/favorites')
-  }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value)
+    const value = e.target.value
+    onSearch(value)
   }
 
-  React.useEffect(() => {
-    if (previousTerm.current !== debouncedSearchTerm) {
-      onSearch(debouncedSearchTerm)
-      previousTerm.current = debouncedSearchTerm
-    }
-  }, [debouncedSearchTerm, onSearch])
+  const navigate = useNavigate()
 
-  const handleCreateUser = (newUser: User) => {
-    setFilteredUsers((prev) => [...prev, newUser])
-    setIsAddModalVisible(false)
+  const handleGoToFavorites = () => {
+    navigate('/favorites')
   }
 
   return (
@@ -55,6 +40,7 @@ const AppHeader: React.FC<HeaderProps> = ({
         <Input
           style={{ width: 300, marginRight: 50 }}
           placeholder="Search by name"
+          value={searchTerm}
           suffix={
             <Tooltip>
               <SearchOutlined style={{ color: 'rgba(0,0,0,.45)' }} />
@@ -77,7 +63,7 @@ const AppHeader: React.FC<HeaderProps> = ({
           </Button>
         )}
         <Button
-          onClick={handleNavigateToFavorites}
+          onClick={handleGoToFavorites}
           type="primary"
           style={{ backgroundColor: 'white', color: 'black', gap: 50 }}
         >
@@ -88,7 +74,7 @@ const AppHeader: React.FC<HeaderProps> = ({
       <UserModal
         visible={isAddModalVisible}
         onCancel={() => setIsAddModalVisible(false)}
-        onSubmit={handleCreateUser}
+        onSubmit={onCreateUser}
       />
     </>
   )

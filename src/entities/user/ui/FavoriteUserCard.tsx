@@ -1,17 +1,33 @@
 import React from 'react'
 import { Avatar, Card, Button } from 'antd'
-import { User } from '../../../entities/user/model/types'
+import { User } from '../model/types'
+import { EditOutlined } from '@ant-design/icons'
 
 interface FavoriteUserCardProps {
   user: User
   onRemove: () => void
+  onEdit: () => void
 }
 
 const FavoriteUserCard: React.FC<FavoriteUserCardProps> = ({
   user,
   onRemove,
+  onEdit,
 }) => (
-  <Card style={{ margin: '10px 0', width: 500 }}>
+  <Card
+    key={user.id}
+    actions={[
+      <EditOutlined key="edit" title="Edit" onClick={onEdit} />,
+      <Button
+        color="danger"
+        variant="solid"
+        onClick={onRemove}
+      >
+        Delete
+      </Button>,
+    ]}
+    style={{ margin: '10px 0', width: 500 }}
+  >
     <Card.Meta
       avatar={
         <Avatar
@@ -28,14 +44,9 @@ const FavoriteUserCard: React.FC<FavoriteUserCardProps> = ({
           <p>
             <b>Email:</b> {user.email}
           </p>
-          <Button
-            color="danger"
-            variant="solid"
-            onClick={onRemove}
-            style={{ marginTop: '25px' }}
-          >
-            Delete
-          </Button>
+          <p>
+            <b>City:</b> {user.address.city}
+          </p>
         </>
       }
     />

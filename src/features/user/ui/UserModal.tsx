@@ -30,12 +30,25 @@ const UserModal: React.FC<UserModalProps> = ({
     },
   })
 
+  React.useEffect(() => {
+    if (visible && !currentUser) {
+      reset({
+        name: '',
+        email: '',
+        username: '',
+        address: { city: '' },
+      })
+    }
+  }, [visible, currentUser])
+
   const handleFormSubmit = (newUserData: UserFormValues) => {
     const newUser: User = {
-      id: currentUser?.id || Date.now(),
+      id: currentUser?.id || Date.now() % 1000,
       ...newUserData,
     }
+
     onSubmit(newUser)
+    reset(newUserData)
     onCancel()
   }
 

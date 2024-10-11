@@ -1,6 +1,6 @@
 import React from 'react'
 import { User } from '../../../entities/user/model/types'
-import UserCard from './UserCard'
+import UserCard from '../../../entities/user/ui/UserCard'
 
 interface UserListProps {
   users: User[]

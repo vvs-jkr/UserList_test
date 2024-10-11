@@ -1,15 +1,17 @@
 import React from 'react'
 import { User } from '../../../entities/user/model/types'
-import FavoriteUserCard from './FavoriteUserCard'
+import FavoriteUserCard from '../../../entities/user/ui/FavoriteUserCard'
 
 interface FavoriteUserListProps {
   favorites: User[]
   onRemove: (userId: number) => void
+  onEdit: (user: User) => void
 }
 
 const FavoriteUserList: React.FC<FavoriteUserListProps> = ({
   favorites,
   onRemove,
+  onEdit,
 }) => (
   <>
     {favorites.length === 0 ? (
@@ -20,6 +22,7 @@ const FavoriteUserList: React.FC<FavoriteUserListProps> = ({
           key={user.id}
           user={user}
           onRemove={() => onRemove(user.id)}
+          onEdit={() => onEdit(user)}
         />
       ))
     )}

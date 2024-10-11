@@ -1,18 +1,18 @@
 import React from 'react'
-import { useGetUsersQuery } from '../entities/user/api/userApi'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   addFavorite,
-  addUser,
   removeFavorite,
   setUsers,
-} from '../entities/user/model/userSlice'
-import { RootState } from '../app/store'
-import { User } from '../entities/user/model/types'
+  updateUser,
+} from '../../../entities/user/model/userSlice'
+import { RootState } from '../../../app/store'
+import { User } from '../../../entities/user/model/types'
 import { Spin, Layout, Flex } from 'antd'
-import EditUserModal from './EditUserModal'
-import UserList from '../features/user/ui/UserList'
-import { AppHeader } from '../widgets/Header'
+import UserList from '../../../features/user/ui/UserList'
+import EditUserModal from '../../../widgets/Modal/EditUserModal'
+import { useGetUsersQuery } from '../../../entities/user/api/userApi'
+import { useOutletContext } from 'react-router-dom'
 
 const contentStyle = {
   minHeight: 'calc(100vh - 100px)',
@@ -22,46 +22,22 @@ const contentStyle = {
 
 const MainPage: React.FC = () => {
   const dispatch = useDispatch()
-  const { data: users, isLoading, error } = useGetUsersQuery()
   const favorites = useSelector((state: RootState) => state.user.favorites)
-  const [filteredUsers, setFilteredUsers] = React.useState<User[]>([])
+  const usersFromRedux = useSelector((state: RootState) => state.user.users)
+  const { filteredUsers } = useOutletContext<{ filteredUsers: User[] }>() // Извлечение filteredUsers из контекста
+
+  const { data: users, isLoading, error } = useGetUsersQuery()
 
   const [isEditModalVisible, setIsEditModalVisible] = React.useState(false)
   const [currentUser, setCurrentUser] = React.useState<User | null>(null)
 
-  const handleCreateUser = (newUser: User) => {
-    console.log('New user :', newUser)
-    dispatch(addUser(newUser))
-    setFilteredUsers((prev) => [...prev, { ...newUser, id: Date.now() }])
-    alert('Пользователь успешно добавлен')
-  }
-
-  const handleSearch = React.useCallback(
-    (searchTerm: string) => {
-      const filtered: User[] = (users || []).filter((user) =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      setFilteredUsers(filtered)
-    },
-    [users]
-  )
+  React.useEffect(() => {}, [usersFromRedux])
 
   React.useEffect(() => {
-    if (users) {
+    if (users && users.length > 0) {
       dispatch(setUsers(users))
-      setFilteredUsers(users)
     }
   }, [users, dispatch])
-
-  const handleEditUser = (user: User) => {
-    setCurrentUser(user)
-    setIsEditModalVisible(true)
-  }
-
-  const handleModalCancel = () => {
-    setIsEditModalVisible(false)
-    setCurrentUser(null)
-  }
 
   const handleFavoriteChange = (user: User, isFavorited: boolean) => {
     if (isFavorited) {
@@ -74,10 +50,14 @@ const MainPage: React.FC = () => {
   }
 
   const handleUpdateUser = (updatedUser: User) => {
-    setFilteredUsers((prevUsers) =>
-      prevUsers.map((user) => (user.id === updatedUser.id ? updatedUser : user))
-    )
+    dispatch(updateUser(updatedUser))
     setCurrentUser(null)
+    setIsEditModalVisible(false)
+  }
+
+  const openEditModal = (user: User) => {
+    setCurrentUser(user)
+    setIsEditModalVisible(true)
   }
 
   if (isLoading) return <Spin fullscreen />
@@ -85,25 +65,22 @@ const MainPage: React.FC = () => {
 
   return (
     <>
-      <AppHeader
-        onSearch={handleSearch}
-        onCreateUser={handleCreateUser}
-        setFilteredUsers={setFilteredUsers}
-      />
       <Layout.Content style={contentStyle}>
         <Flex gap="middle" align="center" vertical style={{ margin: '20' }}>
           <UserList
             users={filteredUsers}
             favorites={favorites}
-            onEditUser={handleEditUser}
+            onEditUser={openEditModal}
             onFavoriteChange={handleFavoriteChange}
           />
         </Flex>
         <EditUserModal
           visible={isEditModalVisible}
           user={currentUser}
-          onCancel={handleModalCancel}
           onSubmit={handleUpdateUser}
+          onCancel={() => {
+            setIsEditModalVisible(false)
+          }}
         />
       </Layout.Content>
     </>
