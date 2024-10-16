@@ -3,39 +3,46 @@ import {
   removeFavorite,
   updateUser,
 } from '../../../entities/user/model/userSlice'
-import { RootState } from '../../../app/store'
-import { Button, Flex, Layout } from 'antd'
-import { User } from '../../../entities/user/model/types'
 import React from 'react'
+import { RootState } from '../../../shared/store/store'
+import { Button, Flex, Layout } from 'antd'
 import { useNavigate } from 'react-router-dom'
-import EditUserModal from '../../../widgets/Modal/EditUserModal'
-import FavoriteUserList from '../../../features/user/ui/FavoriteUserList'
+import { EditUserModal } from '../../../features/user/EditUserModal'
+import { User } from '../../../entities/user/model/types'
+import { UserCard } from '../../../entities/user'
+
+const contentStyle = {
+  minHeight: 'calc(100vh - 100px)',
+  backgroundColor: '#e6f7ff',
+  justifyContent: 'center',
+}
 
 const FavoritePage: React.FC = () => {
   const dispatch = useDispatch()
   const favorites = useSelector((state: RootState) => state.user.favorites)
-  const searchTerm = useSelector((state: RootState) => state.user.searchTerm)
-
+  const users = useSelector((state: RootState) => state.user.users)
   const [isEditModalVisible, setIsEditModalVisible] = React.useState(false)
   const [currentUser, setCurrentUser] = React.useState<User | null>(null)
+  const searchTerm = useSelector((state: RootState) => state.user.searchTerm)
 
-  const filteredFavorites = favorites.filter((user) =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = users.filter(
+    (user) =>
+      favorites.includes(user.id) &&
+      user.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const handleUpdateUser = (updatedUser: User) => {
-    dispatch(updateUser(updatedUser))
-    setCurrentUser(null)
-    setIsEditModalVisible(false)
-  }
-
-  const handleRemove = (userId: number) => {
+  const handleRemoveFavorite = (userId: number) => {
     dispatch(removeFavorite(userId))
   }
 
-  const handleEdit = (user: User) => {
+  const openEditModal = (user: User) => {
     setCurrentUser(user)
     setIsEditModalVisible(true)
+  }
+
+  const handleUpdateUser = (updatedUser: User) => {
+    dispatch(updateUser(updatedUser))
+    setIsEditModalVisible(false)
   }
 
   const navigate = useNavigate()
@@ -45,28 +52,32 @@ const FavoritePage: React.FC = () => {
 
   return (
     <>
-      <Layout.Content
-        style={{
-          padding: '20px',
-          backgroundColor: '#e6f7ff',
-        }}
-      >
-        <Button onClick={handleNavigateToMainPage}>Back to main page</Button>
-        <Flex gap="middle" align="center" vertical>
-          <FavoriteUserList
-            favorites={filteredFavorites}
-            onRemove={handleRemove}
-            onEdit={handleEdit}
+      <Layout.Content style={contentStyle}>
+        <Flex gap="middle" align="center" vertical style={{ margin: '20' }}>
+          <Button onClick={handleNavigateToMainPage}>Back to main page</Button>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
+          >
+            {filteredUsers.map((user) => (
+              <UserCard
+                key={user.id}
+                user={user}
+                onEdit={() => openEditModal(user)}
+                onFavoriteChange={() => handleRemoveFavorite(user.id)}
+                isFavorited={true}
+              />
+            ))}
+          </div>
+
+          <EditUserModal
+            visible={isEditModalVisible}
+            user={currentUser}
+            onSubmit={handleUpdateUser}
+            onCancel={() => {
+              setIsEditModalVisible(false)
+            }}
           />
         </Flex>
-        <EditUserModal
-          visible={isEditModalVisible}
-          user={currentUser}
-          onSubmit={handleUpdateUser}
-          onCancel={() => {
-            setIsEditModalVisible(false)
-          }}
-        />
       </Layout.Content>
     </>
   )

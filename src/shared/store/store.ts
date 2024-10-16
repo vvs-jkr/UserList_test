@@ -1,10 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { userApi } from '../entities/user/api/userApi'
-import userReducer from '../entities/user/model/userSlice'
+import { userApi } from '../../entities/user/api/userApi'
+import userReducer from '../../entities/user/model/userSlice'
 
 export const store = configureStore({
   reducer: {
-    user: userReducer,
+    user: userReducer, 
     [userApi.reducerPath]: userApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>

@@ -1,3 +1,3 @@
-import AppHeader from './ui/Header/AppHeader'
+import AppHeader from './ui/AppHeader'
 
 export { AppHeader }

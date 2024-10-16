@@ -1,18 +1,16 @@
-import { combineReducers, createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { User } from './types'
-import React from 'react'
-import { useDispatch } from 'react-redux'
 
 interface UserState {
   users: User[]
-  favorites: User[]
-  searchTerm:string
+  favorites: number[]
+  searchTerm: string
 }
 
 const initialState: UserState = {
   users: [],
   favorites: [],
-  searchTerm:''
+  searchTerm: '',
 }
 
 const userSlice = createSlice({
@@ -38,39 +36,43 @@ const userSlice = createSlice({
       )
       if (index !== -1) {
         state.users[index] = action.payload
-
         localStorage.setItem('users', JSON.stringify(state.users))
       }
     },
 
-    addFavorite(state, action: PayloadAction<User>) {
-      if (!state.favorites.some((user) => user.id === action.payload.id)) {
+    editUser(state, action: PayloadAction<User>) {
+      const index = state.users.findIndex(
+        (user) => user.id === action.payload.id
+      )
+      if (index !== -1) {
+        state.users[index] = action.payload
+      }
+    },
+
+    addFavorite(state, action: PayloadAction<number>) {
+      if (!state.favorites.includes(action.payload)) {
         state.favorites.push(action.payload)
+      } else {
       }
     },
 
     removeFavorite(state, action: PayloadAction<number>) {
-      state.favorites = state.favorites.filter(
-        (user) => user.id !== action.payload
-      )
+      state.favorites = state.favorites.filter((id) => id !== action.payload)
     },
 
-	 setSearchTermFavorite(state, action: PayloadAction<string>) {
-		state.searchTerm = action.payload; 
-	 },
+    setSearchTermFavorite(state, action: PayloadAction<string>) {
+      state.searchTerm = action.payload
+    },
   },
 })
 
-export const loadInitialUsers = (): User[] => {
-  const storedUsers = localStorage.getItem('users')
-  return storedUsers ? JSON.parse(storedUsers) : []
-}
-
-export const rootReducer = combineReducers({
-  user: userSlice.reducer,
-})
-
-export const { setUsers, addUser, updateUser, addFavorite, removeFavorite,setSearchTermFavorite } =
-  userSlice.actions
-
+export const {
+  addUser,
+  editUser,
+  setUsers,
+  updateUser,
+  addFavorite,
+  removeFavorite,
+  setSearchTermFavorite,
+} = userSlice.actions
 export default userSlice.reducer

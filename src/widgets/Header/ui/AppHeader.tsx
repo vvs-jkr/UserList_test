@@ -2,8 +2,12 @@ import React from 'react'
 import { Button, Input, Layout, Tooltip } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { HeaderProps } from './appHeader.model'
-import UserModal from '../../../../features/user/ui/UserModal'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { User } from '../../../entities/user/model/types'
+import { addUser } from '../../../entities/user/model/userSlice'
+import UserModal from '../../../features/user/UserModal/ui/UserModal'
+import { SearchBar } from '../../../features/user'
 
 const headerStyle: React.CSSProperties = {
   textAlign: 'center',
@@ -18,17 +22,21 @@ const headerStyle: React.CSSProperties = {
 const AppHeader: React.FC<HeaderProps> = ({
   onSearch,
   hideCreateUserButton,
-  onCreateUser,
   searchTerm,
 }) => {
   const [isAddModalVisible, setIsAddModalVisible] = React.useState(false)
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+  const handleCreateUser = (newUser: User) => {
+    dispatch(addUser(newUser))
+    setIsAddModalVisible(false)
+  }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-    onSearch(value)
+    //  onSearch(value)
   }
-
-  const navigate = useNavigate()
 
   const handleGoToFavorites = () => {
     navigate('/favorites')
@@ -37,18 +45,7 @@ const AppHeader: React.FC<HeaderProps> = ({
   return (
     <>
       <Layout.Header style={headerStyle}>
-        <Input
-          style={{ width: 300, marginRight: 50 }}
-          placeholder="Search by name"
-          value={searchTerm}
-          suffix={
-            <Tooltip>
-              <SearchOutlined style={{ color: 'rgba(0,0,0,.45)' }} />
-            </Tooltip>
-          }
-          onChange={handleSearchChange}
-        />
-
+		<SearchBar searchTerm={searchTerm} onSearchChange={handleSearchChange} />
         {!hideCreateUserButton && (
           <Button
             onClick={() => setIsAddModalVisible(true)}
@@ -74,7 +71,7 @@ const AppHeader: React.FC<HeaderProps> = ({
       <UserModal
         visible={isAddModalVisible}
         onCancel={() => setIsAddModalVisible(false)}
-        onSubmit={onCreateUser}
+        onSubmit={handleCreateUser}
       />
     </>
   )

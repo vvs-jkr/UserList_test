@@ -1,18 +1,17 @@
 import React from 'react'
+import { useGetUsersQuery } from '../../../entities/user/api/userApi'
 import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '../../../shared/store/store'
+import UserList from '../../../widgets/UserList/ui/UserList/UserList'
 import {
   addFavorite,
   removeFavorite,
   setUsers,
   updateUser,
 } from '../../../entities/user/model/userSlice'
-import { RootState } from '../../../app/store'
+import { Flex, Layout, Spin } from 'antd'
+import { EditUserModal } from '../../../features/user/EditUserModal'
 import { User } from '../../../entities/user/model/types'
-import { Spin, Layout, Flex } from 'antd'
-import UserList from '../../../features/user/ui/UserList'
-import EditUserModal from '../../../widgets/Modal/EditUserModal'
-import { useGetUsersQuery } from '../../../entities/user/api/userApi'
-import { useOutletContext } from 'react-router-dom'
 
 const contentStyle = {
   minHeight: 'calc(100vh - 100px)',
@@ -22,36 +21,29 @@ const contentStyle = {
 
 const MainPage: React.FC = () => {
   const dispatch = useDispatch()
-  const favorites = useSelector((state: RootState) => state.user.favorites)
-  const usersFromRedux = useSelector((state: RootState) => state.user.users)
-  const { filteredUsers } = useOutletContext<{ filteredUsers: User[] }>() // Извлечение filteredUsers из контекста
-
   const { data: users, isLoading, error } = useGetUsersQuery()
-
+  const searchTerm = useSelector((state: RootState) => state.user.searchTerm)
   const [isEditModalVisible, setIsEditModalVisible] = React.useState(false)
   const [currentUser, setCurrentUser] = React.useState<User | null>(null)
 
-  React.useEffect(() => {}, [usersFromRedux])
-
-  React.useEffect(() => {
-    if (users && users.length > 0) {
-      dispatch(setUsers(users))
-    }
-  }, [users, dispatch])
-
-  const handleFavoriteChange = (user: User, isFavorited: boolean) => {
+  const handleFavoriteChange = (userId: number, isFavorited: boolean) => {
     if (isFavorited) {
-      dispatch(addFavorite(user))
-      alert('Пользователь добавлен в список избранных')
+      dispatch(addFavorite(userId))
     } else {
-      dispatch(removeFavorite(user.id))
-      alert('Пользователь удалён из списка избранных')
+      dispatch(removeFavorite(userId))
     }
   }
 
+  const filteredUsers = useSelector(
+    (state: RootState) => state.user.users
+  )?.filter((user) =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const favorites = useSelector((state: RootState) => state.user.favorites)
+
   const handleUpdateUser = (updatedUser: User) => {
     dispatch(updateUser(updatedUser))
-    setCurrentUser(null)
     setIsEditModalVisible(false)
   }
 
@@ -59,6 +51,12 @@ const MainPage: React.FC = () => {
     setCurrentUser(user)
     setIsEditModalVisible(true)
   }
+
+  React.useEffect(() => {
+    if (users) {
+      dispatch(setUsers(users))
+    }
+  }, [dispatch, users])
 
   if (isLoading) return <Spin fullscreen />
   if (error) return <div>Ошибка: {String(error)}</div>
@@ -68,12 +66,13 @@ const MainPage: React.FC = () => {
       <Layout.Content style={contentStyle}>
         <Flex gap="middle" align="center" vertical style={{ margin: '20' }}>
           <UserList
-            users={filteredUsers}
-            favorites={favorites}
             onEditUser={openEditModal}
+            users={filteredUsers || []}
+            favorites={favorites}
             onFavoriteChange={handleFavoriteChange}
           />
         </Flex>
+
         <EditUserModal
           visible={isEditModalVisible}
           user={currentUser}
