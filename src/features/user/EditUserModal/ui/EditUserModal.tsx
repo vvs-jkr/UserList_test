@@ -17,7 +17,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
   const [formData, setFormData] = React.useState<User | null>(user)
 
   React.useEffect(() => {
-    setFormData(user) // Обновляем состояние формы при изменении пользователя
+    setFormData(user) 
   }, [user])
 
   const handleFormSubmit = (newUserData: User) => {

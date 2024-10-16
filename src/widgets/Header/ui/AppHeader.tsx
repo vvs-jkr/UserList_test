@@ -35,7 +35,6 @@ const AppHeader: React.FC<HeaderProps> = ({
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-    //  onSearch(value)
   }
 
   const handleGoToFavorites = () => {
